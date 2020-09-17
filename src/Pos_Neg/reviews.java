@@ -1,0 +1,68 @@
+package Pos_Neg;
+
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.*;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import Pos_Neg.SVM;
+
+/**
+ * Servlet implementation class reviews
+ */
+@WebServlet("/reviews")
+public class reviews extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public reviews() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		response.getWriter().append("Served at: ").append(request.getContextPath());
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		PrintWriter out = response.getWriter();
+		try{
+		Class.forName("com.mysql.jdbc.Driver");
+		Connection con = DriverManager.getConnection("jdbc:mysql://localhost/food","root","root");
+		String ownername =request.getParameter("ownername");
+		String companyname = request.getParameter("companyname");
+		String review = request.getParameter("review");
+		SVM ss = new SVM();
+		String result=ss.classify(review, con);
+		PreparedStatement ps = con.prepareStatement("insert into rating(review,ownername,companyname,status)values('"+review+"','"+ownername+"','"+companyname+"','"+result+"')");
+		ps.executeUpdate();
+		out.println("<script>");
+		out.println("alert('Your valuable message will be sent to concerned team')");
+		out.println("</script>");
+		RequestDispatcher rd = request.getRequestDispatcher("UserHome.jsp");
+		rd.include(request, response);
+		}
+		catch(Exception e)
+		{
+			System.out.println(e);
+		}
+
+	}
+
+}
